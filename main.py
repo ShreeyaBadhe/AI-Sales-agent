@@ -1,12 +1,11 @@
 import json
 import uuid
-
+import streamlit.components.v1 as components
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.messages.tool import ToolMessage
 
 from virtual_sales_agent.graph import graph
-
 
 def set_page_config():
     st.set_page_config(
@@ -15,29 +14,23 @@ def set_page_config():
         initial_sidebar_state="expanded",
     )
 
-
 def set_page_style():
     st.markdown(
         f"""
         <style>
         {open("assets/style.css").read()}
         </style>
-    """,
+        """,
         unsafe_allow_html=True,
     )
 
-
 def initialize_session_state():
-    """Initialize session state variables."""
     if "messages" not in st.session_state:
         st.session_state.messages = []
-
     if "thread_id" not in st.session_state:
         st.session_state.thread_id = str(uuid.uuid4())
-
     if "pending_approval" not in st.session_state:
         st.session_state.pending_approval = None
-
     if "config" not in st.session_state:
         st.session_state.config = {
             "configurable": {
@@ -48,7 +41,6 @@ def initialize_session_state():
 
 
 def setup_sidebar():
-    """Configure the sidebar with agent information and controls."""
     with st.sidebar:
         st.markdown(
             """
@@ -58,31 +50,73 @@ def setup_sidebar():
                     <h1>Virtual Sales Agent</h1>
                 </div>
                 <div class="feature-list">
-                    <div class="feature-item">
-                        <span class="icon">🛒</span>
-                        <span>Browse available products</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="icon">📦</span>
-                        <span>Place orders</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="icon">🚚</span>
-                        <span>Track your orders</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="icon">🎯</span>
-                        <span>Get personalized recommendations</span>
-                    </div>
+                    <div class="feature-item"><span class="icon">🛒</span><span>Browse available products</span></div>
+                    <div class="feature-item"><span class="icon">📦</span><span>Place orders</span></div>
+                    <div class="feature-item"><span class="icon">🚚</span><span>Track your orders</span></div>
+                    <div class="feature-item"><span class="icon">🎯</span><span>Get personalized recommendations</span></div>
                 </div>
                 <div class="status-card">
                     <div class="status-indicator"></div>
                     <span>Ready to Assist</span>
                 </div>
             </div>
-        """,
+            """,
             unsafe_allow_html=True,
         )
+
+        components.html("""
+            <script>
+            const addMicButton = () => {
+                const inputBox = window.parent.document.querySelector('textarea');
+                if (!inputBox) return;
+
+                const existingButton = document.getElementById("voice-button");
+                if (existingButton) return;
+
+                const button = document.createElement("button");
+                button.innerHTML = "🎤 Speak";
+                button.id = "voice-button";
+                button.style.padding = "10px 16px";
+                button.style.marginBottom = "10px";
+                button.style.background = "#6c47ff";
+                button.style.color = "white";
+                button.style.border = "none";
+                button.style.borderRadius = "10px";
+                button.style.fontWeight = "bold";
+                button.style.cursor = "pointer";
+
+                const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                button.onclick = () => recognition.start();
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    inputBox.focus();
+                    inputBox.value = transcript;
+                    inputBox.dispatchEvent(new Event('input', { bubbles: true }));
+                    inputBox.scrollIntoView({ behavior: "smooth", block: "center" });
+
+                    // Simulate keypress to trigger Streamlit to show send button
+                    const keyDownEvent = new KeyboardEvent('keydown', {
+                        key: ' ',
+                        keyCode: 32,
+                        which: 32,
+                        bubbles: true
+                    });
+                    inputBox.dispatchEvent(keyDownEvent);
+                };
+
+                const parent = inputBox.parentElement;
+                parent.insertBefore(button, inputBox);
+            };
+
+            window.addEventListener('load', addMicButton);
+            </script>
+        """, height=0)
 
         st.markdown("---")
         if st.button("🔄 Start New Chat", use_container_width=True):
@@ -100,9 +134,11 @@ def setup_sidebar():
                     Enhanced by AI • Crafted for You
                 </div>
             </div>
-        """,
+            """,
             unsafe_allow_html=True,
         )
+
+
 
 
 def display_chat_history():
