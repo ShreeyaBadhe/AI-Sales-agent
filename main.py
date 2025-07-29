@@ -84,37 +84,57 @@ def setup_sidebar():
                 button.style.borderRadius = "10px";
                 button.style.fontWeight = "bold";
                 button.style.cursor = "pointer";
-
+                button.style.transition = "box-shadow 0.3s ease";
+                        
                 const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
                 recognition.continuous = false;
                 recognition.lang = 'en-US';
                 recognition.interimResults = false;
                 recognition.maxAlternatives = 1;
 
+                
+                recognition.onstart = () => {
+                    button.style.boxShadow = "0 0 0 8px rgba(108, 71, 255, 0.4)";
+                    button.style.animation = "pulse 1.5s infinite";
+                };
+                recognition.onend = () => {
+                    button.style.boxShadow = "none";
+                    button.style.animation = "none";
+                };
+
                 button.onclick = () => recognition.start();
 
-                recognition.onresult = (event) => {
+                 recognition.onresult = (event) => {
                     const transcript = event.results[0][0].transcript;
                     inputBox.focus();
                     inputBox.value = transcript;
                     inputBox.dispatchEvent(new Event('input', { bubbles: true }));
-                    inputBox.scrollIntoView({ behavior: "smooth", block: "center" });
 
-                    // Simulate keypress to trigger Streamlit to show send button
-                    const keyDownEvent = new KeyboardEvent('keydown', {
+                    const spaceEvent = new KeyboardEvent('keydown', {
                         key: ' ',
                         keyCode: 32,
                         which: 32,
                         bubbles: true
                     });
-                    inputBox.dispatchEvent(keyDownEvent);
+                    inputBox.dispatchEvent(spaceEvent);
                 };
 
                 const parent = inputBox.parentElement;
                 parent.insertBefore(button, inputBox);
             };
 
-            window.addEventListener('load', addMicButton);
+            window.addEventListener('load', () => {
+                const style = document.createElement("style");
+                style.innerHTML = `
+                    @keyframes pulse {
+                        0% { box-shadow: 0 0 0 0 rgba(108, 71, 255, 0.6); }
+                        70% { box-shadow: 0 0 0 12px rgba(108, 71, 255, 0); }
+                        100% { box-shadow: 0 0 0 0 rgba(108, 71, 255, 0); }
+                    }
+                `;
+                document.head.appendChild(style);
+                addMicButton();
+            });
             </script>
         """, height=0)
 
