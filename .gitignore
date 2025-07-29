@@ -1,0 +1,17 @@
+*.xls
+*.xlt
+*.xlsx 
+*.pdf
+venv/
+__pycache__/
+*.DS_Store
+bmg_chrome_profile/
+
+downloads/
+
+*.log
+*.csv
+*.env
+.vscode
+*.db
+*.json
