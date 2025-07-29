@@ -18,7 +18,7 @@ This project implements a **Virtual Sales Agent** that simulates customer intera
 7. [Contributing](#contributing)
 8. [Related Resources](#related-resources)
 9. [Future Plans](#future-plans)
-10. [License](#license)
+
 
 ---
 
