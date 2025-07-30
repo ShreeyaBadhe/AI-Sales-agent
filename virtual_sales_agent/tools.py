@@ -6,9 +6,17 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
 from database.db_manager import DatabaseManager
+from rapidfuzz import process
+
+from database.db_manager import DatabaseManager
 
 db_manager = DatabaseManager()
 
+def fuzzy_match_name(input_query: str, names: List[str], threshold: int = 40) -> Optional[str]:
+    match = process.extractOne(input_query, names)
+    if match and match[1] >= threshold:
+        return match[0]
+    return None
 
 @tool
 def get_available_categories() -> Dict[str, List[str]]:
@@ -24,6 +32,7 @@ def get_available_categories() -> Dict[str, List[str]]:
         )
         categories = cursor.fetchall()
         return {"categories": [category["Category"] for category in categories]}
+
 
 
 @tool
@@ -44,9 +53,6 @@ def search_products(
 
     Returns:
         Dict[str, Any]: Search results with products and metadata
-
-    Example:
-        search_products(query="banana", category="fruits", max_price=5.00)
     """
     with db_manager.get_connection() as conn:
         cursor = conn.cursor()
@@ -55,16 +61,24 @@ def search_products(
         params = []
 
         if query:
-            query_parts.append(
+            cursor.execute("SELECT DISTINCT ProductName FROM products WHERE Quantity > 0")
+            product_names = [row["ProductName"] for row in cursor.fetchall()]
+            best_match = fuzzy_match_name(query, product_names)
+
+            if best_match:
+                query_parts.append("AND LOWER(ProductName) = ?")
+                params.append(best_match.lower())
+            else:
+                query_parts.append(
+                    """
+                    AND (
+                        LOWER(ProductName) LIKE ? 
+                        OR LOWER(Description) LIKE ?
+                    )
                 """
-                AND (
-                    LOWER(ProductName) LIKE ? 
-                    OR LOWER(Description) LIKE ?
                 )
-            """
-            )
-            search_term = f"%{query.lower()}%"
-            params.extend([search_term, search_term])
+                search_term = f"%{query.lower()}%"
+                params.extend([search_term, search_term])
 
         if category:
             query_parts.append("AND LOWER(Category) = ?")
@@ -77,12 +91,9 @@ def search_products(
         if max_price is not None:
             query_parts.append("AND Price <= ?")
             params.append(max_price)
-
-        # Execute search query
         cursor.execute(" ".join(query_parts), params)
         products = cursor.fetchall()
 
-        # Get available categories for metadata
         cursor.execute(
             """
             SELECT DISTINCT Category, COUNT(*) as count 
@@ -93,7 +104,6 @@ def search_products(
         )
         categories = cursor.fetchall()
 
-        # Get price range for metadata
         cursor.execute(
             """
             SELECT 
@@ -132,7 +142,6 @@ def search_products(
                 },
             },
         }
-
 
 @tool
 def create_order(
