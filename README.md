@@ -103,7 +103,7 @@ Here's a breakdown of the project's directory structure:
    - **Main Interface:** A clean and intuitive chatbot interface that interacts with customers to answer queries and perform tasks.
    - **Human-in-the-Loop Approval System:** A mechanism where sensitive actions, like order creation, require user approval. Users can review the action details and provide feedback for continuous improvement.
 
-   ![Demo GIF](./assets/demo.gif)
+   ![Demo GIF](./assets/AiSalesAgent.gif)
 
 2. **LangGraph Workflow**
 
