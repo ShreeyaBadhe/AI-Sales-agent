@@ -1,5 +1,14 @@
 # Virtual Sales Agent powered by LangGraph, Streamlit & Gemini Flash
-
+>Tech Stack:  
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-1E90FF?style=for-the-badge)
+![LangGraph](https://img.shields.io/badge/LangGraph-20B2AA?style=for-the-badge)
+![Gemini Flash](https://img.shields.io/badge/Gemini%20Flash%202.0-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![AI Agent](https://img.shields.io/badge/AI%20Agent-8A2BE2?style=for-the-badge)
+![Human-in-the-Loop](https://img.shields.io/badge/Human--in--the--Loop-FFD700?style=for-the-badge)
+---
 This project implements a **Virtual Sales Agent** that simulates customer interactions, providing information and support through a Streamlit interface. Using the power of **LangChain**, **LangGraph**, and a SQLite database, this agent can answer product questions, create orders, check order statuses, and offer personalized recommendations. These tools are divided into safe and sensitive categories. For sensitive tools, such as creating orders, a human-in-the-loop mechanism is implemented, requiring approval or denial before proceeding.
 
 👉 Check out a quick demo of the Virtual Sales Agent in action in the [Interface Preview](#interface-preview) section!
